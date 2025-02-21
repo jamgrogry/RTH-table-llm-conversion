@@ -5,6 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload Image</title>
     <script>
+        async function setupDatabase() {
+            let response = await fetch("/setup_database", { method: "POST" });
+            let result = await response.json();
+            alert(result.message);
+        }
+
+        async function checkDatabase() {
+            let response = await fetch("/open_database", { method: "POST" });
+            let result = await response.json();
+            alert(result.message);
+        }
+
+        async function uploadToDatabase() {
+            let csvData = document.getElementById("csvTable").dataset.csvData;
+            if (!csvData) {
+                alert("No CSV data found! Upload and extract an image first.");
+                return;
+            }
+
+            let response = await fetch("/upload_to_database", {
+
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ csv_data: JSON.parse(csvData) })
+            });
+
+            let result = await response.json();
+            alert(result.message || result.error);
+        }
+
         function previewImage(event) {
             const file = event.target.files[0];
             if (file) {
@@ -52,10 +82,16 @@
             });
 
             document.getElementById("csvContainer").style.display = "block";
+            document.getElementById("csvTable").dataset.csvData = JSON.stringify(data);
         }
     </script>
 </head>
 <body>
+
+    <h2>Database Controls</h2>
+    <button onclick="setupDatabase()">Create New Database</button>
+    <button onclick="checkDatabase()">Check Existing Database</button>
+    <button onclick="uploadToDatabase()">Upload Data to Database</button>
 
     <h2>Upload an Image</h2>
     <form id="uploadForm" onsubmit="uploadImage(event)" enctype="multipart/form-data">
